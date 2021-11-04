@@ -5,18 +5,21 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
 
 class BookDisplayFragment: Fragment(){
-    private lateinit var titleTextView: TextView
-    private lateinit var authorTextView: TextView
+    private lateinit var titleView: TextView
+    private lateinit var authorView: TextView
+    private lateinit var coverView: ImageView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?{
         val layout = inflater.inflate(R.layout.fragment_book_display, container, false)
 
-        titleTextView = layout.findViewById(R.id.titleView)
-        authorTextView = layout.findViewById(R.id.authorView)
+        titleView = layout.findViewById(R.id.titleView)
+        authorView = layout.findViewById(R.id.authorView)
+        coverView = layout.findViewById(R.id.coverView)
 
         return layout
     }
@@ -29,8 +32,9 @@ class BookDisplayFragment: Fragment(){
 
     private fun updateBook(book: Book?){
         book?.run{
-            titleTextView.text = title
-            authorTextView.text = author
+            titleView.text = title
+            authorView.text = author
+            coverView.setImageResource(id)
         }
     }
 }
