@@ -1,10 +1,8 @@
 package edu.temple.audiobb
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import androidx.lifecycle.ViewModelProvider
 
 class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
@@ -17,14 +15,6 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        //Start Dialog Activity
-        val dialogButton = findViewById<Button>(R.id.dialogButton)
-        dialogButton.setOnClickListener{
-            val intent = Intent(this, BookSearchActivity::class.java)
-            startActivity(intent)
-        }
-
 
         //Get test data
         val bookList = getBookList()
