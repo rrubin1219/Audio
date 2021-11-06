@@ -11,7 +11,8 @@
         android:theme="@style/Theme.AudioBB">
         <activity
             android:name=".BookSearchActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Dialog"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">
