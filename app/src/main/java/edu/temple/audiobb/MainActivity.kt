@@ -18,6 +18,7 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //Start Dialog Activity
         val dialogButton = findViewById<Button>(R.id.dialogButton)
         dialogButton.setOnClickListener{
             val intent = Intent(this, BookSearchActivity::class.java)
