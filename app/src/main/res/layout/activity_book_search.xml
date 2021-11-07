@@ -7,7 +7,7 @@
     tools:context=".BookSearchActivity">
 
     <EditText
-        android:id="@+id/searchView"
+        android:id="@+id/searchTermView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
@@ -19,12 +19,12 @@
         tools:text="Search Term" />
 
     <Button
-        android:id="@+id/search"
+        android:id="@+id/searchView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
         android:text="Search"
-        app:layout_constraintEnd_toEndOf="@+id/searchView"
-        app:layout_constraintTop_toBottomOf="@+id/searchView" />
+        app:layout_constraintEnd_toEndOf="@+id/searchTermView"
+        app:layout_constraintTop_toBottomOf="@+id/searchTermView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

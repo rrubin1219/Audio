@@ -6,6 +6,8 @@ import android.view.View
 import androidx.lifecycle.ViewModelProvider
 
 class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
+
+
     private val isSingleContainer: Boolean by lazy{
         findViewById<View>(R.id.displayContainer) == null
     }
@@ -49,7 +51,14 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
 
     private fun getBookList(): BookList{
         val bookList = BookList()
-        /*
+        val title = intent.getStringExtra("title")
+        val author = intent.getStringExtra("author")
+        val cover = intent.getStringExtra("cover")
+        val bundle = intent.extras
+        val id: Int? = bundle?.getInt("id")
+
+        bookList.add(Book(title.toString(), author.toString(), id,cover.toString()))
+/*
         bookList.add(Book("Book 0", "Author 9"))
         bookList.add(Book("Book 1", "Author 8"))
         bookList.add(Book("Book 2", "Author 7"))
@@ -61,7 +70,7 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         bookList.add(Book("Book 8", "Author 2"))
         bookList.add(Book("Book 9", "Author 0"))
         */
-         
+
 
         return bookList
     }

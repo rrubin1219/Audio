@@ -30,6 +30,7 @@ class BookListFragment: Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?){
         super.onViewCreated(view, savedInstanceState)
+
         //Start Dialog Activity
         val dialogButton = view.findViewById<Button>(R.id.dialogButton)
         dialogButton.setOnClickListener{
