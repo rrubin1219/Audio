@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +14,6 @@ private const val BOOK_LIST = "bookList"
 
 class BookListFragment: Fragment(){
     private var bookList: BookList? = null
-    lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
@@ -31,15 +29,7 @@ class BookListFragment: Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?){
         super.onViewCreated(view, savedInstanceState)
 
-        //Start Dialog Activity
-        val dialogButton = view.findViewById<Button>(R.id.dialogButton)
-        dialogButton.setOnClickListener{
-            val intent = Intent(requireContext(), BookSearchActivity::class.java)
-            startActivity(intent)
-        }
-
         val bookViewModel = ViewModelProvider(requireActivity()).get(BookViewModel::class.java)
-        recyclerView = view.findViewById(R.id.recyclerView)
 
         val onClick : (Book) -> Unit = {
             // Update the ViewModel
@@ -47,8 +37,7 @@ class BookListFragment: Fragment(){
             // Inform the activity of the selection so as to not have the event replayed when the activity is restarted
             (activity as BookSelectedInterface).bookSelected()
         }
-
-        recyclerView.apply {
+        with (view as RecyclerView) {
             layoutManager = LinearLayoutManager(requireActivity())
             adapter = BookListAdapter (bookList!!, onClick)
         }

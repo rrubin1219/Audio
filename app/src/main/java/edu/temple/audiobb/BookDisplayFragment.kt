@@ -28,6 +28,7 @@ class BookDisplayFragment: Fragment(){
         titleView = layout.findViewById(R.id.titleView)
         authorView = layout.findViewById(R.id.authorView)
         coverView = layout.findViewById(R.id.coverView)
+
         return layout
     }
 
