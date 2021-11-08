@@ -6,10 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
-import com.squareup.picasso.Picasso
 
 class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
     private val isSingleContainer: Boolean by lazy{
@@ -18,8 +16,10 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
     private val selectedBookViewModel: BookViewModel by lazy{
         ViewModelProvider(this).get(BookViewModel::class.java)
     }
+    private val dialogButton: Button by lazy {
+        findViewById(R.id.dialogButton)
+    }
     private lateinit var bundle: BookList
-
     private val result = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         result ->
         if(result.resultCode == Activity.RESULT_OK){
@@ -35,7 +35,6 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         val intent = Intent(this, BookSearchActivity::class.java)
 
         //Start Dialog Activity
-        val dialogButton = findViewById<Button>(R.id.dialogButton)
         dialogButton.setOnClickListener{
             startActivity(intent)
             //result.launch(intent)

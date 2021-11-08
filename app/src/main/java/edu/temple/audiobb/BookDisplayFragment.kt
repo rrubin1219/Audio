@@ -1,21 +1,14 @@
 package edu.temple.audiobb
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import com.android.volley.Request
-import com.android.volley.RequestQueue
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
-import org.json.JSONException
 
 class BookDisplayFragment: Fragment(){
     private lateinit var titleView: TextView
@@ -41,9 +34,7 @@ class BookDisplayFragment: Fragment(){
         book?.run{
             titleView.text = title
             authorView.text = author
-            if (id != null) {
-                coverView.setImageResource(id)
-            }
+            Picasso.get().load(coverURL).into(coverView)
         }
     }
 }
