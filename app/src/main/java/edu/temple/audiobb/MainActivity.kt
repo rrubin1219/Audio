@@ -19,11 +19,13 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
     private val dialogButton: Button by lazy {
         findViewById(R.id.dialogButton)
     }
-    private lateinit var bundle: BookList
+
+    private lateinit var bundle: Book
+
     private val result = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         result ->
         if(result.resultCode == Activity.RESULT_OK){
-            bundle = result.data?.getSerializableExtra("books") as BookList
+            bundle =result.data?.getSerializableExtra("books") as Book
 
         }
     }
@@ -32,14 +34,11 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val intent = Intent(this, BookSearchActivity::class.java)
-
         //Start Dialog Activity
         dialogButton.setOnClickListener{
-            startActivity(intent)
-            //result.launch(intent)
+            val intent = Intent(this, BookSearchActivity::class.java)
+            result.launch(intent)
         }
-
 
         //Get test data
         val bookList = getBookList()
@@ -95,11 +94,13 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
 
         return bookList
     }
+
     override fun onBackPressed(){
         //Back press clears the selected book
         selectedBookViewModel.setBook(null)
         super.onBackPressed()
     }
+
     override fun bookSelected(){
         // Perform a fragment replacement if we only have a single container when a book is selected
         if(isSingleContainer){

@@ -1,5 +1,6 @@
 package edu.temple.audiobb
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -12,6 +13,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONException
+import kotlin.properties.Delegates
 
 class BookSearchActivity : AppCompatActivity() {
     private val volleyQueue: RequestQueue by lazy {
@@ -33,19 +35,20 @@ class BookSearchActivity : AppCompatActivity() {
             fetchBook(searchText.text.toString())
         }
     }
+
+    override fun onBackPressed() {
+        setResult(Activity.RESULT_CANCELED)
+        finish()
+    }
+
     private fun fetchBook(term: String?) {
         val url = "https://kamorris.com/lab/cis3515/search.php?term=$term"
         val intent = Intent(this, MainActivity::class.java)
-
         volleyQueue.add(
             JsonObjectRequest(Request.Method.GET, url, null, {
                     Log.d("Response", it.toString())
                     try {
-                        intent.putExtra("title", it.getString("title"))
-                        intent.putExtra("author", it.getString("author"))
-                        intent.putExtra("cover", it.getString("cover_url"))
-                        intent.putExtra("id", it.getInt("id"))
-                        startActivity(intent)
+                        intent.putExtra("books", Book(it.getString("title"), it.getString("author"),it.getInt("id"), it.getString("cover_url")))
                     } catch (e: JSONException) {
                         e.printStackTrace()
                     }
@@ -54,5 +57,7 @@ class BookSearchActivity : AppCompatActivity() {
                 }
             )
         )
+        setResult(RESULT_OK, intent)
+        finish()
     }
 }
