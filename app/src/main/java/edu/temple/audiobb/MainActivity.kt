@@ -4,13 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
-import java.io.Serializable
 
 class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
     private val isSingleContainer: Boolean by lazy{
@@ -32,6 +30,7 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
                 result ->
             if(result != null && result.resultCode == Activity.RESULT_OK){
                 list = result.data?.getSerializableExtra("list") as? BookList
+                Toast.makeText(this, "Passed", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -42,14 +41,14 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         }
 
         //Get test data
-        val bookList = getBookList()
+        val bookList = list//getBookList()//
 
         //Switching from one container to two containers clear BookDisplayFragment from listContainer
         if (supportFragmentManager.findFragmentById(R.id.listContainer) is BookDisplayFragment) {
             supportFragmentManager.popBackStack()
         }
         //First time the activity is loading, add a BookListFragment
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && bookList != null) {
             supportFragmentManager.beginTransaction()
                 .add(R.id.listContainer, BookListFragment.newInstance(bookList))
                 .commit()
@@ -70,13 +69,20 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
                 .add(R.id.displayContainer, BookDisplayFragment())
                 .commit()
         }
-    }
 
+        //One container and not displaying BookListFragment
+        if(isSingleContainer && supportFragmentManager.findFragmentById(R.id.listContainer) is BookDisplayFragment){
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.displayContainer, BookListFragment())
+                .commit()
+        }
+    }
+/*
     private fun getBookList(): BookList{
         val bookList = BookList()
-/*
 
-        bookList.add(Book(title.toString(), author.toString(), id,cover.toString()))
+
+        //bookList.add(Book("Book 1", "Author", 1,"https:\\/\\/kamorris.com\\/lab\\/abp\\/covers\\/IslandOfDrMoreau.jpeg"))
 
         bookList.add(Book("Book 0", "Author 9"))
         bookList.add(Book("Book 1", "Author 8"))
@@ -88,12 +94,12 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         bookList.add(Book("Book 7", "Author 3"))
         bookList.add(Book("Book 8", "Author 2"))
         bookList.add(Book("Book 9", "Author 0"))
-        */
+
 
 
         return bookList
     }
-
+*/
     override fun onBackPressed(){
         //Back press clears the selected book
         selectedBookViewModel.setBook(null)

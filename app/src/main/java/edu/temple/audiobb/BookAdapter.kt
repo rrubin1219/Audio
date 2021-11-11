@@ -1,13 +1,12 @@
 package edu.temple.audiobb
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class BookListAdapter(_bookList: BookList, _onClick: (Book) -> Unit): RecyclerView.Adapter<BookListAdapter.BookViewHolder>(){
+class BookAdapter(_bookList: BookList, _onClick: (Book) -> Unit): RecyclerView.Adapter<BookAdapter.BookViewHolder>(){
     private val bookList = _bookList
     private val onClick = _onClick
 

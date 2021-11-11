@@ -38,7 +38,7 @@ class BookListFragment: Fragment(){
         }
         with (view as RecyclerView) {
             layoutManager = LinearLayoutManager(requireActivity())
-            adapter = BookListAdapter (bookList!!, onClick)
+            adapter = BookAdapter (bookList!!, onClick)
         }
     }
     companion object {

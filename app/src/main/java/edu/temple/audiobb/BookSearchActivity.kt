@@ -53,7 +53,7 @@ class BookSearchActivity : AppCompatActivity() {
                             for(i in 0 until result.length()){
                                 val book = result.getJSONObject(i)
                                 val b = Book(book.getString("title"), book.getString("author"), book.getInt("id"),  book.getString("cover_url"))
-                                Log.d("book", b.toString())
+                                Log.d("list", b.toString())
                                 list?.add(b)
                             }
                     } catch (e: JSONException) {
