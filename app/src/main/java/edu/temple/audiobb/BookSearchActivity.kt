@@ -10,10 +10,9 @@ import android.widget.TextView
 import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.RequestQueue
-import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONException
-import kotlin.properties.Delegates
 
 class BookSearchActivity : AppCompatActivity() {
     private val volleyQueue: RequestQueue by lazy {
@@ -25,6 +24,7 @@ class BookSearchActivity : AppCompatActivity() {
     private val searchButton: Button by lazy {
         findViewById(R.id.searchButton)
     }
+    private var list: BookList? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,12 +43,19 @@ class BookSearchActivity : AppCompatActivity() {
 
     private fun fetchBook(term: String?) {
         val url = "https://kamorris.com/lab/cis3515/search.php?term=$term"
+
         val intent = Intent(this, MainActivity::class.java)
+        val bundle = Bundle()
+
         volleyQueue.add(
-            JsonObjectRequest(Request.Method.GET, url, null, {
-                    Log.d("Response", it.toString())
-                    try {
-                        intent.putExtra("books", Book(it.getString("title"), it.getString("author"),it.getInt("id"), it.getString("cover_url")))
+            JsonArrayRequest(Request.Method.GET, url, null, {
+                    result -> try {
+                            for(i in 0 until result.length()){
+                                val book = result.getJSONObject(i)
+                                val b = Book(book.getString("title"), book.getString("author"), book.getInt("id"),  book.getString("cover_url"))
+                                Log.d("book", b.toString())
+                                list?.add(b)
+                            }
                     } catch (e: JSONException) {
                         e.printStackTrace()
                     }
@@ -57,6 +64,10 @@ class BookSearchActivity : AppCompatActivity() {
                 }
             )
         )
+
+        //Sending info over
+        bundle.putSerializable("list", list)
+        intent.putExtras(bundle)
         setResult(RESULT_OK, intent)
         finish()
     }

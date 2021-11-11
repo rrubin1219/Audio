@@ -4,10 +4,13 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
+import java.io.Serializable
 
 class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
     private val isSingleContainer: Boolean by lazy{
@@ -19,20 +22,18 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
     private val dialogButton: Button by lazy {
         findViewById(R.id.dialogButton)
     }
-
-    private lateinit var bundle: Book
-
-    private val result = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-        result ->
-        if(result.resultCode == Activity.RESULT_OK){
-            bundle =result.data?.getSerializableExtra("books") as Book
-
-        }
-    }
+    private var list: BookList? = null
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val result = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+                result ->
+            if(result != null && result.resultCode == Activity.RESULT_OK){
+                list = result.data?.getSerializableExtra("list") as? BookList
+            }
+        }
 
         //Start Dialog Activity
         dialogButton.setOnClickListener{
@@ -43,19 +44,18 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         //Get test data
         val bookList = getBookList()
 
-        //if(this::bundle.isInitialized) {
-
-            //Switching from one container to two containers clear BookDisplayFragment from listContainer
-            if (supportFragmentManager.findFragmentById(R.id.listContainer) is BookDisplayFragment) {
-                supportFragmentManager.popBackStack()
-            }
-            //First time the activity is loading, add a BookListFragment
-            if (savedInstanceState == null) {
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.listContainer, BookListFragment.newInstance(bookList))
-                    .commit()
-            } else {
-                //Activity loaded previously, If a single container and a selected book, place it on top
+        //Switching from one container to two containers clear BookDisplayFragment from listContainer
+        if (supportFragmentManager.findFragmentById(R.id.listContainer) is BookDisplayFragment) {
+            supportFragmentManager.popBackStack()
+        }
+        //First time the activity is loading, add a BookListFragment
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.listContainer, BookListFragment.newInstance(bookList))
+                .commit()
+        }
+        else {
+            //Activity loaded previously, If a single container and a selected book, place it on top
                 if (isSingleContainer && selectedBookViewModel.getBook().value != null) {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.listContainer, BookDisplayFragment())
@@ -63,14 +63,13 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
                         .addToBackStack(null)
                         .commit()
                 }
-            }
-            //Two containers but no BookDetailsFragment, add one to displayContainer
-            if (!isSingleContainer && supportFragmentManager.findFragmentById(R.id.displayContainer) !is BookDisplayFragment) {
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.displayContainer, BookDisplayFragment())
-                    .commit()
-            }
-        //}
+        }
+        //Two containers but no BookDetailsFragment, add one to displayContainer
+        if (!isSingleContainer && supportFragmentManager.findFragmentById(R.id.displayContainer) !is BookDisplayFragment) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.displayContainer, BookDisplayFragment())
+                .commit()
+        }
     }
 
     private fun getBookList(): BookList{
