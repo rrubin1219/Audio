@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,33 +10,49 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="60dp"
         android:layout_marginBottom="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/displayContainer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialogButton"
+        app:layout_constraintTop_toBottomOf="@id/dialogButton"
         app:layout_constraintWidth_percent=".35" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/displayContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
+        app:layout_constraintTop_toBottomOf="@id/controlContainer"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/listContainer"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/listContainer" />
 
     <Button
         android:id="@+id/dialogButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
         android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
-        app:layout_constraintEnd_toStartOf="@+id/displayContainer"
+        android:layout_marginEnd="10dp"
+        android:text="Search"
+        app:layout_constraintEnd_toStartOf="@+id/controlContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="Search" />
+        tools:layout_constraintEnd_toEndOf="@id/controlContainer"
+        tools:layout_constraintEnd_toStartOf="@id/controlContainer" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/controlContainer"
+        android:name="edu.temple.audiobb.ControlFragment"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/dialogButton"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
