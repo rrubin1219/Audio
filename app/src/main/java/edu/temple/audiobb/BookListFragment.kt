@@ -1,5 +1,6 @@
 package edu.temple.audiobb
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -12,13 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 private const val BOOK_LIST = "bookList"
 
 class BookListFragment: Fragment(){
-    private var bookList: BookList? = null
-
-    override fun onCreate(savedInstanceState: Bundle?){
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            bookList = it.getSerializable(BOOK_LIST) as BookList?
-        }
+    private val bookList: BookList by lazy {
+        ViewModelProvider(requireActivity()).get(BookList::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View{
@@ -38,10 +34,18 @@ class BookListFragment: Fragment(){
         }
         with (view as RecyclerView) {
             layoutManager = LinearLayoutManager(requireActivity())
-            adapter = BookAdapter (bookList!!, onClick)
+            adapter = BookAdapter (bookList, onClick)
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun listUpdated(){
+        view?.apply {
+            (this as RecyclerView).adapter?.notifyDataSetChanged()
         }
     }
     companion object {
+        @JvmStatic
         fun newInstance(bookList: BookList) = BookListFragment().apply{
             arguments = Bundle().apply{
                 putSerializable(BOOK_LIST, bookList)

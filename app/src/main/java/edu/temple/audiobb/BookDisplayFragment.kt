@@ -24,12 +24,10 @@ class BookDisplayFragment: Fragment(){
 
         return layout
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?){
         super.onViewCreated(view, savedInstanceState)
         ViewModelProvider(requireActivity()).get(BookViewModel::class.java).getBook().observe(requireActivity(),{updateBook(it)})
     }
-
     private fun updateBook(book: Book?){
         book?.run{
             titleView.text = title
