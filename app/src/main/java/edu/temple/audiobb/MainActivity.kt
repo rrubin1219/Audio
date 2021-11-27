@@ -1,12 +1,20 @@
 package edu.temple.audiobb
 
+import android.content.ComponentName
 import android.content.Intent
+import android.content.ServiceConnection
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
 import android.view.View
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
+import edu.temple.audlibplayer.PlayerService
+import kotlin.properties.Delegates
+
 
 class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
     private val isSingleContainer: Boolean by lazy{
@@ -22,6 +30,9 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         findViewById(R.id.dialogButton)
     }
 
+    var isConnected = false
+    lateinit var playerBinder: PlayerService.MediaControlBinder //Service Binder
+    var bookProgress by Delegates.notNull<Int>()
     private lateinit var bookListFragment: BookListFragment
 
     private val result = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
@@ -29,6 +40,25 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         it.data?.run {
             bookListViewModel.copyBooks(getSerializableExtra(BookList.BOOKLIST_KEY) as BookList)
             bookListFragment.listUpdated()
+        }
+    }
+
+    //Service Handler
+    private val playerHandler = Handler(Looper.getMainLooper()){
+        bookProgress = (it.obj as PlayerService.BookProgress).progress
+        true
+    }
+
+    //Service Connection
+    private val serviceConnection = object: ServiceConnection{
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            isConnected = true
+            playerBinder = service as PlayerService.MediaControlBinder
+            playerBinder.setProgressHandler(playerHandler)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isConnected = false
         }
     }
 
@@ -44,6 +74,26 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         dialogButton.setOnClickListener{
             result.launch(Intent(this, BookSearchActivity::class.java))
         }
+
+        val play = false
+        val pause = false
+        val stop = false
+
+        if(play == true && isConnected){
+            playerBinder.play(0)
+        }
+        if(pause == true && isConnected){
+            playerBinder.pause()
+        }
+        if(stop == true && isConnected){
+            playerBinder.stop()
+        }
+
+
+
+
+        //Bind Service Connection
+        bindService(Intent(this, PlayerService::class.java), serviceConnection, BIND_AUTO_CREATE)
 
         //Switching from one container to two containers clear BookDisplayFragment from listContainer
         if (supportFragmentManager.findFragmentById(R.id.listContainer) is BookDisplayFragment && selectedBookViewModel.getBook().value != null) {
@@ -81,6 +131,12 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
                 .commit()
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unbindService(serviceConnection)
+    }
+
     override fun onBackPressed(){
         //Back press clears the selected book
         selectedBookViewModel.setBook(null)
