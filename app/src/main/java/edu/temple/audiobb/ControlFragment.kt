@@ -8,33 +8,14 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.SeekBar
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [controlFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ControlFragment : Fragment() {
     private lateinit var playButton: ImageButton
     private lateinit var pauseButton: ImageButton
     private lateinit var stopButton: ImageButton
     private lateinit var progressBar: SeekBar
 
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var book: Book
+    val max = book.duration
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -44,54 +25,40 @@ class ControlFragment : Fragment() {
         stopButton = layout.findViewById(R.id.stopButton)
         progressBar = layout.findViewById(R.id.seekBar)
 
-        playButton.setOnClickListener{
+        var spot: Int
+        val bundle = Bundle()
 
+        playButton.setOnClickListener{
+            bundle.putBoolean("play", true)
+            bundle.putBoolean("pause", false)
+            bundle.putBoolean("stop", false)
         }
         pauseButton.setOnClickListener{
-
+            bundle.putBoolean("play", false)
+            bundle.putBoolean("pause", true)
+            bundle.putBoolean("stop", false)
         }
         stopButton.setOnClickListener{
-
+            bundle.putBoolean("play", false)
+            bundle.putBoolean("pause", false)
+            bundle.putBoolean("stop", true)
         }
+
         progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                TODO("Not yet implemented")
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                bundle.putBoolean("fromUser", fromUser)
+                bundle.putInt("progress", progress)
             }
-
-            override fun onStartTrackingTouch(p0: SeekBar?) {
-                TODO("Not yet implemented")
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
             }
-
-            override fun onStopTrackingTouch(p0: SeekBar?) {
-                TODO("Not yet implemented")
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                val p = seekBar.progress/100 //Percent of progress
+                spot = p*max
+                bundle.putInt("spot", spot)
             }
-
         })
         return layout
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment controlFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ControlFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
 }

@@ -8,11 +8,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import edu.temple.audlibplayer.PlayerService
+import java.lang.Exception
 import kotlin.properties.Delegates
 
 
@@ -30,9 +32,9 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         findViewById(R.id.dialogButton)
     }
 
+    private var bookProgress = 0
     var isConnected = false
     lateinit var playerBinder: PlayerService.MediaControlBinder //Service Binder
-    var bookProgress by Delegates.notNull<Int>()
     private lateinit var bookListFragment: BookListFragment
 
     private val result = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
@@ -75,25 +77,39 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
             result.launch(Intent(this, BookSearchActivity::class.java))
         }
 
-        val play = false
-        val pause = false
-        val stop = false
+        val bundle = Bundle() //Bundle to pass data
 
-        if(play == true && isConnected){
-            playerBinder.play(0)
+        //Determine if button was pressed
+        val play = bundle.getBoolean("play", false)
+        val pause = bundle.getBoolean("pause", false)
+        val stop = bundle.getBoolean("stop", false)
+
+        //Handles seekBar
+        val progress = bundle.getInt("progress") //Auto seek to
+        val fromUser = bundle.getBoolean("fromUser", false)
+        val spot = bundle.getInt("spot") //Manuel seek ro
+
+        if(play && isConnected){
+            playerBinder.play(progress)
         }
-        if(pause == true && isConnected){
+        if(pause && isConnected){
             playerBinder.pause()
         }
-        if(stop == true && isConnected){
+        if(stop && isConnected){
             playerBinder.stop()
         }
 
-
-
+        if(fromUser){
+            playerBinder.seekTo(spot)
+        }
 
         //Bind Service Connection
         bindService(Intent(this, PlayerService::class.java), serviceConnection, BIND_AUTO_CREATE)
+
+        //Initializing Control Fragment
+        supportFragmentManager.beginTransaction()
+            .add(R.id.controlContainer, ControlFragment())
+            .commit()
 
         //Switching from one container to two containers clear BookDisplayFragment from listContainer
         if (supportFragmentManager.findFragmentById(R.id.listContainer) is BookDisplayFragment && selectedBookViewModel.getBook().value != null) {
