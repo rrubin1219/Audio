@@ -1,18 +1,21 @@
 package edu.temple.audiobb
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
+import android.widget.Button
 import android.widget.SeekBar
+import android.widget.TextView
 
 class ControlFragment : Fragment() {
-    private lateinit var playButton: ImageButton
-    private lateinit var pauseButton: ImageButton
-    private lateinit var stopButton: ImageButton
+    private lateinit var playButton: Button
+    private lateinit var pauseButton: Button
+    private lateinit var stopButton: Button
     private lateinit var progressBar: SeekBar
+    private lateinit var nowPlaying: TextView
 
     private lateinit var book: Book
     val max = book.duration
@@ -20,10 +23,18 @@ class ControlFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val layout = inflater.inflate(R.layout.fragment_control, container, false)
+
         playButton = layout.findViewById(R.id.playButton)
         pauseButton = layout.findViewById(R.id.pauseButton)
         stopButton = layout.findViewById(R.id.stopButton)
         progressBar = layout.findViewById(R.id.seekBar)
+        nowPlaying = layout.findViewById(R.id.nowPlaying)
+
+        playButton.setBackgroundColor(Color.GREEN)
+        pauseButton.setBackgroundColor(Color.YELLOW)
+        stopButton.setBackgroundColor(Color.RED)
+
+        nowPlaying.text = book.title
 
         var spot: Int
         val bundle = Bundle()
@@ -43,7 +54,6 @@ class ControlFragment : Fragment() {
             bundle.putBoolean("pause", false)
             bundle.putBoolean("stop", true)
         }
-
         progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 bundle.putBoolean("fromUser", fromUser)
@@ -59,6 +69,4 @@ class ControlFragment : Fragment() {
         })
         return layout
     }
-
-
 }
