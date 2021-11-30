@@ -14,11 +14,8 @@ class ControlFragment : Fragment() {
     private lateinit var playButton: Button
     private lateinit var pauseButton: Button
     private lateinit var stopButton: Button
-    private lateinit var progressBar: SeekBar
-    private lateinit var nowPlaying: TextView
-
-    private lateinit var book: Book
-    val max = book.duration
+    private var progressBar: SeekBar? = null
+    private var nowPlaying: TextView? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -34,39 +31,43 @@ class ControlFragment : Fragment() {
         pauseButton.setBackgroundColor(Color.YELLOW)
         stopButton.setBackgroundColor(Color.RED)
 
-        nowPlaying.text = book.title
-
-        var spot: Int
-        val bundle = Bundle()
-
-        playButton.setOnClickListener{
-            bundle.putBoolean("play", true)
-            bundle.putBoolean("pause", false)
-            bundle.putBoolean("stop", false)
-        }
-        pauseButton.setOnClickListener{
-            bundle.putBoolean("play", false)
-            bundle.putBoolean("pause", true)
-            bundle.putBoolean("stop", false)
-        }
-        stopButton.setOnClickListener{
-            bundle.putBoolean("play", false)
-            bundle.putBoolean("pause", false)
-            bundle.putBoolean("stop", true)
-        }
-        progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                bundle.putBoolean("fromUser", fromUser)
-                bundle.putInt("progress", progress)
+        progressBar?.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                if(p2) (activity as MediaControlInterface).seek(p1)
             }
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
+            override fun onStartTrackingTouch(p0: SeekBar?) {
             }
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                val p = seekBar.progress/100 //Percent of progress
-                spot = p*max
-                bundle.putInt("spot", spot)
+            override fun onStopTrackingTouch(p0: SeekBar?) {
             }
         })
+
+        val onClickListener = View.OnClickListener {
+            val parent = activity as MediaControlInterface
+            when (it.id) {
+                R.id.playButton -> parent.play()
+                R.id.pauseButton -> parent.pause()
+                R.id.stopButton -> parent.stop()
+            }
+        }
+
+        playButton.setOnClickListener(onClickListener)
+        pauseButton.setOnClickListener(onClickListener)
+        stopButton.setOnClickListener(onClickListener)
+
         return layout
+    }
+
+    fun setNowPlaying(title: String) {
+        nowPlaying?.text = title
+    }
+    fun setPlayProgress(progress: Int) {
+        progressBar?.setProgress(progress, true)
+    }
+
+    interface MediaControlInterface {
+        fun play()
+        fun pause()
+        fun stop()
+        fun seek(position: Int)
     }
 }

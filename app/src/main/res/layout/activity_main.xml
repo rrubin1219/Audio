@@ -7,13 +7,13 @@
     tools:context=".MainActivity">
 
     <Button
+        android:text="Search"
         android:id="@+id/dialogButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="101dp"
-        android:text="Search"
-        app:layout_constraintBottom_toTopOf="@+id/listContainer"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,22 +23,24 @@
         android:id="@+id/listContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="2dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dialogButton" />
+        app:layout_constraintTop_toBottomOf="@+id/controlFragmentContainer" />
 
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fragmentContainerView"
+        android:id="@+id/controlFragmentContainer"
         android:name="edu.temple.audiobb.ControlFragment"
         android:layout_width="0dp"
-        android:layout_height="87dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        app:layout_constraintBottom_toTopOf="@+id/listContainer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toEndOf="@+id/dialogButton"
+        app:layout_constraintStart_toStartOf="@+id/dialogButton"
         app:layout_constraintTop_toBottomOf="@+id/dialogButton" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

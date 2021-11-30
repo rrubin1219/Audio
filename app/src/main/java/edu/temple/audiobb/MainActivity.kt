@@ -13,17 +13,21 @@ import android.view.View
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import edu.temple.audlibplayer.PlayerService
-import java.lang.Exception
-import kotlin.properties.Delegates
 
 
-class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
+class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface, ControlFragment.MediaControlInterface{
     private val isSingleContainer: Boolean by lazy{
         findViewById<View>(R.id.displayContainer) == null
     }
     private val selectedBookViewModel: BookViewModel by lazy{
         ViewModelProvider(this).get(BookViewModel::class.java)
+    }
+    private val playingBookViewModel : PlayingBookViewModel by lazy {
+        ViewModelProvider(this).get(PlayingBookViewModel::class.java)
     }
     private val bookListViewModel: BookList by lazy {
         ViewModelProvider(this).get((BookList::class.java))
@@ -32,10 +36,10 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         findViewById(R.id.dialogButton)
     }
 
-    private var bookProgress = 0
     var isConnected = false
     lateinit var playerBinder: PlayerService.MediaControlBinder //Service Binder
     private lateinit var bookListFragment: BookListFragment
+    private lateinit var service: Intent
 
     private val result = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         supportFragmentManager.popBackStack()
@@ -46,8 +50,28 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
     }
 
     //Service Handler
-    private val playerHandler = Handler(Looper.getMainLooper()){
-        bookProgress = (it.obj as PlayerService.BookProgress).progress
+    val playerHandler = Handler(Looper.getMainLooper()) { msg ->
+        msg.obj?.let { msgObj ->
+            val bookProgress = msgObj as PlayerService.BookProgress
+
+            if (playingBookViewModel.getPlayingBook().value == null) {
+                Volley.newRequestQueue(this)
+                    .add(JsonObjectRequest(Request.Method.GET, API.getBookDataUrl(bookProgress.bookId), null, { jsonObject ->
+                        playingBookViewModel.setPlayingBook(Book(jsonObject))
+                        if (selectedBookViewModel.getBook().value == null) {
+                            selectedBookViewModel.setBook(playingBookViewModel.getPlayingBook().value)
+                            bookSelected()
+                        }
+                    }, {}))
+            }
+            supportFragmentManager.findFragmentById(R.id.controlContainer)?.run{
+                with (this as ControlFragment) {
+                    playingBookViewModel.getPlayingBook().value?.also {
+                        setPlayProgress(((bookProgress.progress / it.duration.toFloat()) * 100).toInt())
+                    }
+                }
+            }
+        }
         true
     }
 
@@ -58,7 +82,6 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
             playerBinder = service as PlayerService.MediaControlBinder
             playerBinder.setProgressHandler(playerHandler)
         }
-
         override fun onServiceDisconnected(name: ComponentName?) {
             isConnected = false
         }
@@ -75,41 +98,18 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
         //Start Dialog Activity
         dialogButton.setOnClickListener{
             result.launch(Intent(this, BookSearchActivity::class.java))
+
         }
 
-        val bundle = Bundle() //Bundle to pass data
+        playingBookViewModel.getPlayingBook().observe(this, {
+            (supportFragmentManager.findFragmentById(R.id.controlFragmentContainer) as ControlFragment).setNowPlaying(it.title)
+        })
 
-        //Determine if button was pressed
-        val play = bundle.getBoolean("play", false)
-        val pause = bundle.getBoolean("pause", false)
-        val stop = bundle.getBoolean("stop", false)
-
-        //Handles seekBar
-        val progress = bundle.getInt("progress") //Auto seek to
-        val fromUser = bundle.getBoolean("fromUser", false)
-        val spot = bundle.getInt("spot") //Manuel seek ro
-
-        if(play && isConnected){
-            playerBinder.play(progress)
-        }
-        if(pause && isConnected){
-            playerBinder.pause()
-        }
-        if(stop && isConnected){
-            playerBinder.stop()
-        }
-
-        if(fromUser){
-            playerBinder.seekTo(spot)
-        }
+        //Service Intent
+        service = Intent(this, PlayerService::class.java)
 
         //Bind Service Connection
-        bindService(Intent(this, PlayerService::class.java), serviceConnection, BIND_AUTO_CREATE)
-
-        //Initializing Control Fragment
-        supportFragmentManager.beginTransaction()
-            .add(R.id.controlContainer, ControlFragment())
-            .commit()
+        bindService(service, serviceConnection, BIND_AUTO_CREATE)
 
         //Switching from one container to two containers clear BookDisplayFragment from listContainer
         if (supportFragmentManager.findFragmentById(R.id.listContainer) is BookDisplayFragment && selectedBookViewModel.getBook().value != null) {
@@ -168,5 +168,27 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface{
                 .addToBackStack(null)
                 .commit()
         }
+    }
+
+    override fun play() {
+        if (isConnected && selectedBookViewModel.getBook().value != null) {
+            Log.d("Button pressed", "Play button")
+            playerBinder.play(selectedBookViewModel.getBook().value!!.id)
+            playingBookViewModel.setPlayingBook(selectedBookViewModel.getBook().value)
+            startService(service)
+        }
+    }
+    override fun pause() {
+        if (isConnected) playerBinder.pause()
+    }
+    override fun stop() {
+        if (isConnected) {
+            playerBinder.stop()
+            stopService(service)
+        }
+    }
+    override fun seek(position: Int) {
+        // Converting percentage to proper book progress
+        if (isConnected && playerBinder.isPlaying) playerBinder.seekTo((playingBookViewModel.getPlayingBook().value!!.duration * (position.toFloat() / 100)).toInt())
     }
 }
