@@ -30,9 +30,9 @@ class BookAdapter(_bookList: BookList, _onClick: (Book) -> Unit): RecyclerView.A
     }
     // Bind the book to the holder along with the values for the views
     override fun onBindViewHolder(holder: BookViewHolder, position: Int){
-        holder.titleTextView.text = bookList[position]?.title
-        holder.authorTextView.text = bookList[position]?.author
-        holder.book = bookList[position]!!
+        holder.titleTextView.text = bookList[position].title
+        holder.authorTextView.text = bookList[position].author
+        holder.book = bookList[position]
     }
     override fun getItemCount(): Int{
         return bookList.size()

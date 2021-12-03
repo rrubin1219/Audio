@@ -1,8 +1,11 @@
 package edu.temple.audiobb
 
+import android.app.DownloadManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -177,6 +180,7 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface,
             playingBookViewModel.setPlayingBook(selectedBookViewModel.getBook().value)
             startService(service)
         }
+
     }
     override fun pause() {
         if (isConnected) playerBinder.pause()
@@ -190,5 +194,14 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface,
     override fun seek(position: Int) {
         // Converting percentage to proper book progress
         if (isConnected && playerBinder.isPlaying) playerBinder.seekTo((playingBookViewModel.getPlayingBook().value!!.duration * (position.toFloat() / 100)).toInt())
+    }
+
+    //Downloading audio file
+    fun download(id: Int): Long {
+        val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val uri: Uri = Uri.parse(API.downloadBook(id))
+        val request = DownloadManager.Request(uri)
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+        return manager.enqueue(request)
     }
 }

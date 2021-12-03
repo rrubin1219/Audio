@@ -5,5 +5,9 @@ class API {
         fun getBookDataUrl(id: Int): String{
             return "https://kamorris.com/lab/cis3515/book.php?id=${id}"
         }
+
+        fun downloadBook(id: Int): String {
+            return "https://kamorris.com/lab/audlib/download.php?id=${id}"
+        }
     }
 }
