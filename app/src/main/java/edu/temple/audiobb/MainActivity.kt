@@ -1,26 +1,24 @@
 package edu.temple.audiobb
 
 import android.app.DownloadManager
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.*
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.webkit.URLUtil
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import edu.temple.audlibplayer.PlayerService
-
+import java.io.File
+import java.lang.Exception
 
 class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface, ControlFragment.MediaControlInterface{
     private val isSingleContainer: Boolean by lazy{
@@ -97,6 +95,9 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface,
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        checkPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, 101)
+        checkPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE, 100)
 
         //Start Dialog Activity
         dialogButton.setOnClickListener{
@@ -176,11 +177,20 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface,
     override fun play() {
         if (isConnected && selectedBookViewModel.getBook().value != null) {
             Log.d("Button pressed", "Play button")
-            playerBinder.play(selectedBookViewModel.getBook().value!!.id)
-            playingBookViewModel.setPlayingBook(selectedBookViewModel.getBook().value)
+            val id = selectedBookViewModel.getBook().value!!.id
+
+            val file = File(filesDir, download(id))  //Creating audio file
+
+            if(file.exists()){ //Play downloaded file
+                playerBinder.play(file, 0)
+            }
+            else{ //If first time listening, stream from internet and download file
+                playerBinder.play(selectedBookViewModel.getBook().value!!.id)
+                playingBookViewModel.setPlayingBook(selectedBookViewModel.getBook().value)
+                download(id)
+            }
             startService(service)
         }
-
     }
     override fun pause() {
         if (isConnected) playerBinder.pause()
@@ -196,12 +206,32 @@ class MainActivity: AppCompatActivity(), BookListFragment.BookSelectedInterface,
         if (isConnected && playerBinder.isPlaying) playerBinder.seekTo((playingBookViewModel.getPlayingBook().value!!.duration * (position.toFloat() / 100)).toInt())
     }
 
-    //Downloading audio file
-    fun download(id: Int): Long {
-        val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val uri: Uri = Uri.parse(API.downloadBook(id))
-        val request = DownloadManager.Request(uri)
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-        return manager.enqueue(request)
+    //Downloading audio file in background
+    private fun download(id: Int): String{
+        val url = API.downloadBook(id)
+        val request = DownloadManager.Request(Uri.parse(url))
+        val fileName = request.setTitle(selectedBookViewModel.getBook().value!!.title).toString()
+
+        Thread {
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+
+            val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            //Toast.makeText(this, "Downloading..", Toast.LENGTH_SHORT).show()
+
+            manager.enqueue(request)
+        }.start()
+        return fileName
+    }
+
+    //Check User Permissions
+    private fun checkPermission(permission: String, requestCode: Int){
+        if(checkSelfPermission(permission) == PackageManager.PERMISSION_DENIED){
+            requestPermissions(arrayOf(permission), requestCode)
+        }
+    }
+
+    private fun saveTitle(){
+
     }
 }
